@@ -1,0 +1,2 @@
+open -a XQuartz
+DISPLAY=:0 xfreerdp /v:<IP> /u:<username> /p:<password> /cert:ignore
