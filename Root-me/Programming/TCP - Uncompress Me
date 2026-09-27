@@ -1,0 +1,52 @@
+import socket
+import base64
+import zlib
+import re
+
+HOST = "challenge01.root-me.org"
+PORT = 52022
+
+def decode(encoded: str) -> str:
+    return zlib.decompress(base64.b64decode(encoded)).decode()
+
+def main():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(5)
+    sock.connect((HOST, PORT))
+
+    buf = ""
+    while True:
+        try:
+            chunk = sock.recv(4096).decode()
+        except socket.timeout:
+            break
+        if not chunk:
+            break
+
+        buf += chunk
+        print(buf, end="", flush=True)
+
+        while "What is your answer ?" in buf:
+            match = re.search(r"'([A-Za-z0-9+/=]+)'", buf)
+            if not match:
+                break
+
+            encoded = match.group(1)
+            answer = decode(encoded)
+            print(f"\n>>> Sending: {answer}")
+            sock.sendall((answer + "\n").encode())
+
+            buf = ""
+            try:
+                chunk = sock.recv(4096).decode()
+            except socket.timeout:
+                break
+            if not chunk:
+                break
+            buf += chunk
+            print(buf, end="", flush=True)
+
+    sock.close()
+
+if __name__ == "__main__":
+    main()
