@@ -1,0 +1,25 @@
+import socket
+import base64
+
+HOST = "challenge01.root-me.org"
+PORT = 52023
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.settimeout(5)
+    s.connect((HOST, PORT))
+
+    data = s.recv(4096).decode()
+    print(data)
+
+    start = data.find("'") + 1
+    end = data.find("'", start)
+    encoded = data[start:end]
+    print(f"Encoded: {encoded}")
+
+    decoded = base64.b64decode(encoded).decode()
+    print(f"Decoded: {decoded}")
+
+    s.sendall((decoded + "\n").encode())
+
+    response = s.recv(4096).decode()
+    print(response)
