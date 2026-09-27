@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+"""Root-me: TCP - The Roman wheel (ROT13 decode over TCP)"""
+
+import socket
+import codecs
+import re
+
+HOST = "challenge01.root-me.org"
+PORT = 52021
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.settimeout(5)
+    s.connect((HOST, PORT))
+
+    data = s.recv(4096).decode()
+    print(f"Received:\n{data}")
+
+    match = re.search(r"'([^']+)'", data)
+    encoded = match.group(1)
+    decoded = codecs.decode(encoded, "rot_13")
+    print(f"Encoded: {encoded}")
+    print(f"Decoded: {decoded}")
+
+    s.sendall((decoded + "\n").encode())
+
+    response = s.recv(4096).decode()
+    print(f"Response:\n{response}")
